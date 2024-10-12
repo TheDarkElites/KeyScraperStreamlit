@@ -29,19 +29,3 @@ def find_keywords(doc, keywords):
         if word in doc:
             found_keywords.append(word)
     return found_keywords
-
-def main():
-    soup = load_html("page.html")
-    posts = soup.find_all("div", class_="post") #Scraps each post class
-
-    remove_comments(posts)
-    doc = format_posts(posts)
-    found_keywords = find_keywords(doc, keywords)
-    
-    formatted_doc = " ".join(doc.split()) #Removes whitespace
-
-    print(f"Formatted Text:\n{formatted_doc}\n\nKeywords Found: {found_keywords}")
-
-
-if __name__ == "__main__":
-    main()
