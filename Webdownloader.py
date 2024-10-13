@@ -13,6 +13,7 @@ def scrapePage(url):
     indexPage = BeautifulSoup(f, "html.parser")
 
     validPost = False
+    validLinks = []
 
     #Finds all td divs and iterates through
     for post in indexPage.find_all("td"):
@@ -50,9 +51,10 @@ def scrapePage(url):
             try: 
                 savePage(link)
                 validPost = True
+                validLinks.append(link)
             except:
                 continue
-    return validPost
+    return validPost, validLinks
     
 def savePage(url, name = "", location = "SavedPages/"):
     response = urllib.request.urlopen(url)
@@ -65,18 +67,23 @@ def savePage(url, name = "", location = "SavedPages/"):
     f.write(webContent)
     f.close
 
-def iteratePages(start_url):
-    url = start_url
+def iteratePages(startUrl):
+    url = startUrl
     page = 0
+    links = []
 
     while True:
         page+=1
         print(f"Scraping Page: {page}. Url: {url}")
 
-        if not scrapePage(url): #Tries to scrape the URL. Will fail when out of pages
+        validPost, validLinks = scrapePage(url)
+        
+        links.extend(validLinks)
+
+        if not validPost: #Tries to scrape the URL. Will fail when out of pages
             break
 
         url = f"https://geekhack.org/index.php?board=70.{page*50}" #Each URL goes up in increments of 50
         #ERROR: Breaks on page 46
     
-    return page
+    return page, links
