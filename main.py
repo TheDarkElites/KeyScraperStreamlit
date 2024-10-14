@@ -1,4 +1,4 @@
-import webdownloader
+import Webdownloader
 import webscrape
 import os 
 import tkinter as tk  # GUI
@@ -13,7 +13,7 @@ def scrapePages():
     startUrl = "https://geekhack.org/index.php?board=70.0"
 
     # Scrapes pages
-    totalPages, validLinks = webdownloader.iteratePages(startUrl)
+    totalPages, validLinks = Webdownloader.iteratePages(startUrl)
     print(f"Total pages found: {totalPages}")
     saveLinks(validLinks)
     return validLinks
@@ -38,8 +38,8 @@ def parsePages(validLinks):
                 correspondingLink = next((link for link in validLinks if linkName in link), None)
 
                 if correspondingLink:
-                    # Display the link and found keywords without hyperlinking
-                    updateLinkDisplay(f"{correspondingLink}\nKeywords Found: {foundKeywords}")
+                    # Update link display on the main thread
+                    root.after(0, updateLinkDisplay, f"{correspondingLink}\nKeywords Found: {foundKeywords}")
 
 def saveLinks(links):
     with open(VALID_LINKS_FILE, "w") as f:  # Creates file if doesn't exist
@@ -48,7 +48,8 @@ def saveLinks(links):
 def loadLinks():
     if os.path.exists(VALID_LINKS_FILE):
         with open(VALID_LINKS_FILE, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+            return data if data else []  # Return empty list if the file contains []
     else:
         saveLinks([])  # Creates file w/empty list if it doesnt exist
         return []
@@ -61,14 +62,21 @@ def deleteExistingFiles():
             os.remove(filePath)  # Delete the file
 
 def onScrapeButton():
-    deleteExistingFiles()
-    updateStatus("Scraping in progress...")
-    disableButtons()
-    validLinks = scrapePages()
-    updateStatus("Scraping completed.")
+    # Check if the valid_links.json file is empty or doesn't exist
+    global validLinks
+    if not validLinks or validLinks == []:
+        deleteExistingFiles()
+        updateStatus("Scraping in progress...")
+        disableButtons()
+        validLinks = scrapePages()
+        updateStatus("Scraping completed.")
+    else:
+        updateStatus("Valid links already exist. Skipping scraping.")
+    
     enableButtons()
 
 def onParseButton():
+    global validLinks
     if not validLinks:  # Check if scrape has already been done
         updateStatus("You need to scrape first to get valid links.")
     else:
