@@ -2,7 +2,7 @@ import Webdownloader
 import webscrape
 import os 
 import tkinter as tk  # GUI
-import threading  # GUI still usable during long tasks
+import threading  #multithreading
 import json  # Saving links file
 
 VALID_LINKS_FILE = "SavedPages/valid_links.json"
@@ -10,10 +10,8 @@ validLinks = []
 keywords = []  # Store keywords globally
 
 def scrapePages():
-    startUrl = "https://geekhack.org/index.php?board=70.0"
-
     # Scrapes pages
-    totalPages, validLinks = Webdownloader.iteratePages(startUrl)
+    totalPages, validLinks = Webdownloader.iteratePages()
     print(f"Total pages found: {totalPages}")
     saveLinks(validLinks)
     return validLinks

@@ -46,15 +46,22 @@ def scrapePage(url):
                     tag_found = True
             if not tag_found:
                 continue
-
+    
             #save page using savePage
             try: 
                 savePage(link)
-                validPost = True
                 validLinks.append(link)
             except:
                 continue
-    return validPost, validLinks
+    nextPage = None
+    #find our next link (technically we could do this all in one loop but then it gets ugly)
+    for posNextLink in indexPage.find_all("a"):
+        htmlClass = posNextLink.get('class')
+        htmlContents = posNextLink.contents
+        if(htmlClass and htmlClass[0] == "navPages" and htmlContents and htmlContents[0] == "»"):
+            nextPage = posNextLink.get('href')
+            break
+    return validLinks, nextPage
     
 def savePage(url, name = "", location = "SavedPages/"):
     response = urllib.request.urlopen(url)
@@ -67,23 +74,17 @@ def savePage(url, name = "", location = "SavedPages/"):
     f.write(webContent)
     f.close
 
-def iteratePages(startUrl):
-    url = startUrl
+def iteratePages():
+    nextPage = "https://geekhack.org/index.php?board=70"
     page = 0
     links = []
 
-    while True:
-        page+=1
-        print(f"Scraping Page: {page}. Url: {url}")
+    while nextPage:
+        page += 1
+        print(f"Scraping Page: {page}. Url: {nextPage}")
 
-        validPost, validLinks = scrapePage(url)
+        validLinks, nextPage = scrapePage(nextPage)
         
         links.extend(validLinks)
-
-        if not validPost: #Tries to scrape the URL. Will fail when out of pages
-            break
-
-        url = f"https://geekhack.org/index.php?board=70.{page*50}" #Each URL goes up in increments of 50
-        #ERROR: Breaks on page 46
     
     return page, links
