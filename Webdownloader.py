@@ -1,4 +1,5 @@
 import urllib.request, urllib.error, urllib.parse
+import streamlit as st
 from bs4 import BeautifulSoup
 
 whitelistTags = ["[gb]", "instock"]
@@ -72,16 +73,17 @@ def savePage(url, name = "", location = "SavedPages/"):
 
     f = open(location + name + ".html", 'w')
     f.write(webContent)
-    f.close
+    f.close()
 
 def iteratePages():
     nextPage = "https://geekhack.org/index.php?board=70"
     page = 0
     links = []
 
-    while nextPage:
+    while nextPage and (page < st.session_state.page_limit if isinstance(st.session_state.page_limit, int) else True):
         page += 1
         print(f"Scraping Page: {page}. Url: {nextPage}")
+        st.session_state.messages.append(f"Scraping Page: {page}. Url: {nextPage}")
 
         validLinks, nextPage = scrapePage(nextPage)
         

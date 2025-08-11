@@ -8,12 +8,10 @@ def loadHtml(filePath):
         soup = BeautifulSoup(f, "html.parser")
     return soup
 
-
 def removeComments(posts):
     for post in posts: #Iterates thru each post (keyword for comments)
         for comment in post.find_all(string=lambda text: isinstance(text, Comment)): #Finds all instances of comment inside of post
             comment.extract() #Removes comment
-
 
 def formatPosts(posts):
     formattedDoc = ""
