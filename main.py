@@ -116,6 +116,10 @@ def onUpdateKeywords():
     st.session_state.keywords = [keyword.strip() for keyword in keyword_input.split(",")]
     st.write("Keywords updated.")
 
+def wipeCache():
+    rmtree(Path(VALID_LINKS_FILE).parent)
+    st.session_state.valid_links = []
+
 # Thread wrappers
 def scrapeThread():
     st.session_state.scrape_running = True
@@ -133,17 +137,18 @@ def parseThread():
 
 st.title("GeekHack Webscraper")
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.button("Scrape",disabled=st.session_state.scrape_running or st.session_state.parse_running,on_click=scrapeThread, help="This button will scrape up to the number of pages indicated in the Page Limit box for valid posts regarding currently avalible keyboards. This can be a time intensive process.")
 with col2:
     st.button("Parse",disabled=st.session_state.scrape_running or st.session_state.parse_running,on_click=parseThread, help="This button will parse the valid posts and only return the links to those which contain the provided keywords.")
 with col3:
     st.number_input("Page Limit", value=None,key="page_limit",help="Limits the maximium number of pages to scrape off of GeekHack. Leave blank to set to unlimited.",format="%d",step=1)
+with col4:
+    st.button("Wipe Saved Pages",disabled=st.session_state.scrape_running or st.session_state.parse_running or not st.session_state.valid_links,on_click=wipeCache,help="Deletes the scraped pages off the cache.",type="primary")
 
 # Keyword input
-st.text_input("Keywords", key="keyword_input")
-st.button("Update Keywords", on_click=onUpdateKeywords)
+st.text_input("Keywords", key="keyword_input", on_change=onUpdateKeywords)
 
 with st.status("Waiting" if not (st.session_state.scrape_running or st.session_state.parse_running) else "Scraping..." if st.session_state.scrape_running else "Parsing...", expanded=st.session_state.scrape_running or st.session_state.parse_running, state="running") as statusB:
     for message in st.session_state.messages:
