@@ -8,6 +8,7 @@ import json  # Saving links file
 from time import sleep
 from queue import Queue
 from pathlib import Path
+from shutil import rmtree
 
 VALID_LINKS_FILE = "SavedPages/valid_links.json"
 
